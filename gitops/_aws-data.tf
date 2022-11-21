@@ -18,26 +18,11 @@ data "aws_eks_cluster_auth" "this" {
 }
 
 # The TeamRole IAM role used when at AWS event
-data "aws_iam_role" "team_event" {
-  name = "TeamRole"
-}
+#data "aws_iam_role" "team_event" {
+#  name = "TeamRole"
+#}
 
 data "aws_acm_certificate" "issued" {
   domain   = var.acm_certificate_domain
   statuses = ["ISSUED"]
-}
-
-data "kubectl_path_documents" "karpenter_provisioners" {
-  pattern = "${path.module}/kubernetes/karpenter/*"
-  vars = {
-    azs                     = join(",", local.azs)
-    iam-instance-profile-id = "${local.name}-${local.node_group_name}"
-    eks-cluster-id          = local.name
-    eks-vpc_name            = local.name
-  }
-}
-
-resource "kubectl_manifest" "karpenter_provisioner" {
-  for_each  = toset(data.kubectl_path_documents.karpenter_provisioners.documents)
-  yaml_body = each.value
 }
